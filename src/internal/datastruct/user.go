@@ -4,7 +4,6 @@ import "gorm.io/gorm"
 
 type UserModel struct {
 	gorm.Model
-	UserID    uint   `gorm:"uniqueIndex:user_id;autoIncrement" json:"user_id,omitempty"`
 	FirstName string `gorm:"column:first_name" json:"first_name,omitempty"`
 	LastName  string `gorm:"column:last_name" json:"last_name,omitempty"`
 	Email     string `gorm:"uniqueIndex:email" json:"email,omitempty"`
