@@ -1,0 +1,38 @@
+name: Go Project CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+          cache-dependency-path: src/go.sum
+
+      - name: Debug Information
+        run: |
+          cd src  # Change the working directory to the 'src' directory
+          echo "Current directory: $(pwd)"
+          echo "Contents of go.mod:"
+          cat go.mod
+        continue-on-error: true
+
+      - name: Install Go dependencies
+        run: cd src && go mod download
+
+      - name: Build
+        run: cd src && go build -v ./...
+
+      - name: Test
+        run: cd src && go test -v ./...
