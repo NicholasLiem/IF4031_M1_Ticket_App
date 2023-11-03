@@ -2,6 +2,7 @@ package datastruct
 
 import "gorm.io/gorm"
 
+// TODO: Make the routes
 type Payment struct {
 	gorm.Model
 	InvoiceID          uint          `json:"invoice_id,omitempty"`

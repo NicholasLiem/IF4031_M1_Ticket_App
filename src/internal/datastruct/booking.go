@@ -2,6 +2,8 @@ package datastruct
 
 import "gorm.io/gorm"
 
+//TODO: Make the routes
+
 type Booking struct {
 	gorm.Model
 	CustomerID uint   `json:"customer_id,omitempty"`
