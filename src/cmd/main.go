@@ -54,7 +54,7 @@ func main() {
 	/**
 	Run DB Migration
 	*/
-	datastruct.Migrate(db, &datastruct.Event{}, &datastruct.UserModel{}, &datastruct.Payment{}, &datastruct.Invoice{}, &datastruct.Booking{})
+	datastruct.Migrate(db, &datastruct.Event{}, &datastruct.UserModel{}, &datastruct.Payment{}, &datastruct.Invoice{})
 
 	/**
 	Setting up the router
