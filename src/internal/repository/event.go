@@ -65,7 +65,7 @@ func (eq *eventQuery) DeleteEvent(eventID uint) (*datastruct.Event, error) {
 
 func (eq *eventQuery) GetEvent(eventID uint) (*datastruct.Event, error) {
 	event := datastruct.Event{}
-	result := eq.pgdb.Where("id = ?", eventID).Preload("AvailableSeats").First(&event)
+	result := eq.pgdb.Where("id = ?", eventID).Preload("Seats").First(&event)
 	if result.Error != nil {
 		return nil, result.Error
 	}

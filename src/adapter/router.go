@@ -17,6 +17,7 @@ func NewRouter(server app.MicroserviceServer) *mux.Router {
 		routes.UserRoutes(server),
 		routes.AuthRoutes(server),
 		routes.EventRoutes(server),
+		routes.SeatRoutes(server),
 	)
 
 	for _, route := range structs.AppRoutes {

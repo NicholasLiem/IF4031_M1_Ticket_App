@@ -20,6 +20,7 @@ const (
 	SessionExpired       = "The session is already expired"
 	FailToUnMarshalData  = "Fail to unmarshal data"
 	FailToEncodeCookie   = "Fail to encode cookie"
+	DataNotFound         = "Data not found"
 )
 
 /*
@@ -28,8 +29,8 @@ Success messages
 */
 const (
 	SuccessfulDataObtain   = "Successfully obtained data"
-	SuccessfulDataCreation = "Successfully created a new"
-	SuccessfulDataDeletion = "Successfully deleted a new"
+	SuccessfulDataCreation = "Successfully created a new data"
+	SuccessfulDataDeletion = "Successfully deleted a new data"
 	SuccessfulDataUpdate   = "Successfully updated a data"
 	SuccessfulLogin        = "Successfully logged in"
 	SuccessfulRegister     = "Successfully registered a user"

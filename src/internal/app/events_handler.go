@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/datastruct"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils"
@@ -69,6 +70,7 @@ func (m *MicroserviceServer) GetEvent(w http.ResponseWriter, r *http.Request) {
 
 	event, err := m.eventService.GetEvent(*parsedEventID)
 	if err != nil {
+		fmt.Println(err)
 		response.ErrorResponse(w, http.StatusInternalServerError, messages.FailToGetData)
 		return
 	}

@@ -12,6 +12,7 @@ import (
 type DAO interface {
 	NewUserQuery() UserQuery
 	NewEventQuery() EventQuery
+	NewSeatQuery() SeatQuery
 }
 
 type dao struct {
@@ -73,4 +74,8 @@ func (d *dao) NewUserQuery() UserQuery {
 
 func (d *dao) NewEventQuery() EventQuery {
 	return NewEventQuery(d.pgdb)
+}
+
+func (d *dao) NewSeatQuery() SeatQuery {
+	return NewSeatQuery(d.pgdb)
 }

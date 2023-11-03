@@ -39,6 +39,7 @@ func main() {
 	userService := service.NewUserService(dao)
 	authService := service.NewAuthService(dao)
 	eventService := service.NewEventService(dao)
+	seatService := service.NewSeatService(dao)
 
 	/**
 	Registering Services to Server
@@ -47,6 +48,7 @@ func main() {
 		userService,
 		authService,
 		eventService,
+		seatService,
 	)
 
 	/**

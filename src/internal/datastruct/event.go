@@ -4,6 +4,6 @@ import "gorm.io/gorm"
 
 type Event struct {
 	gorm.Model
-	EventName      string `gorm:"column:event_name" json:"event_name,omitempty"`
-	AvailableSeats []Seat `gorm:"many2many:event_seats;"`
+	EventName string `gorm:"column:event_name" json:"event_name,omitempty"`
+	Seats     []Seat `json:"-"`
 }

@@ -37,6 +37,13 @@ func EventRoutes(server app.MicroserviceServer) structs.RoutePrefix {
 				server.DeleteEvent,
 				true,
 			},
+			{
+				"Get the seats from event id",
+				"GET",
+				"/{event_id}/seats",
+				server.GetSeatsForEvent,
+				true,
+			},
 		},
 	}
 }
