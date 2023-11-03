@@ -5,16 +5,16 @@ import (
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/app"
 )
 
-func TestRoutes(server app.MicroserviceServer) structs.RoutePrefix {
+func BookingRoutes(server app.MicroserviceServer) structs.RoutePrefix {
 	return structs.RoutePrefix{
-		Prefix: "/v1/test",
+		Prefix: "/v1/book",
 		SubRoutes: []structs.Route{
 			{
-				"Create a new user",
+				"Book seat",
 				"POST",
-				"/",
-				server.Test,
-				false,
+				"",
+				server.BookSeat,
+				true,
 			},
 		},
 	}
