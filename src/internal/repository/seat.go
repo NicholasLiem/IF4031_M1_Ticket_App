@@ -28,49 +28,83 @@ func (sq *seatQuery) CreateSeat(seat datastruct.Seat) (*datastruct.Seat, error) 
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	
+
 	return &seat, nil
 }
 
 func (sq *seatQuery) UpdateSeat(seatID uint, seat datastruct.Seat) (*datastruct.Seat, error) {
+	tx := sq.pgdb.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
 	existingSeat := datastruct.Seat{}
-	result := sq.pgdb.First(&existingSeat, seatID)
+	result := tx.First(&existingSeat, seatID)
 	if result.Error != nil {
+		tx.Rollback()
 		return nil, result.Error
 	}
 
 	existingSeat.Status = seat.Status
 
-	result = sq.pgdb.Save(&existingSeat)
+	result = tx.Save(&existingSeat)
 	if result.Error != nil {
+		tx.Rollback()
 		return nil, result.Error
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return nil, err
 	}
 
 	return &existingSeat, nil
 }
 
 func (sq *seatQuery) DeleteSeat(seatID uint) (*datastruct.Seat, error) {
+	tx := sq.pgdb.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
 	existingSeat := datastruct.Seat{}
-	result := sq.pgdb.First(&existingSeat, seatID)
+	result := tx.First(&existingSeat, seatID)
 	if result.Error != nil {
+		tx.Rollback()
 		return nil, result.Error
 	}
 
-	result = sq.pgdb.Delete(&existingSeat)
+	result = tx.Delete(&existingSeat)
 	if result.Error != nil {
+		tx.Rollback()
 		return nil, result.Error
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return nil, err
 	}
 
 	return &existingSeat, nil
 }
 
 func (sq *seatQuery) GetSeat(seatID uint) (*datastruct.Seat, error) {
-	seat := datastruct.Seat{}
-	result := sq.pgdb.First(&seat, seatID)
-	if result.Error != nil {
-		return nil, result.Error
+	tx := sq.pgdb.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 
+	seat := datastruct.Seat{}
+	result := tx.First(&seat, seatID)
+	if result.Error != nil {
+		tx.Rollback()
+		return nil, result.Error
+	}
+	
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 	return &seat, nil
 }
 
