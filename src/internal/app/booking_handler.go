@@ -52,6 +52,8 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//TODO: Create Invoice To Payment App
+
 	//Set the seat status on hold and booking id
 	existingSeat.Status = datastruct.ONGOING
 	seat, err := m.seatService.UpdateSeat(existingSeat.ID, *existingSeat)
