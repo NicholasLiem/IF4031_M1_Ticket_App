@@ -14,8 +14,6 @@ func NewRouter(server app.MicroserviceServer) *mux.Router {
 	router := mux.NewRouter()
 
 	structs.AppRoutes = append(structs.AppRoutes,
-		routes.UserRoutes(server),
-		routes.AuthRoutes(server),
 		routes.EventRoutes(server),
 		routes.SeatRoutes(server),
 		routes.BookingRoutes(server),

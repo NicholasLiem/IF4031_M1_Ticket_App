@@ -10,7 +10,6 @@ import (
 )
 
 type DAO interface {
-	NewUserQuery() UserQuery
 	NewEventQuery() EventQuery
 	NewSeatQuery() SeatQuery
 }
@@ -66,10 +65,6 @@ func SetupDB() *gorm.DB {
 	sqlDB.SetMaxOpenConns(100)
 
 	return db
-}
-
-func (d *dao) NewUserQuery() UserQuery {
-	return NewUserQuery(d.pgdb)
 }
 
 func (d *dao) NewEventQuery() EventQuery {

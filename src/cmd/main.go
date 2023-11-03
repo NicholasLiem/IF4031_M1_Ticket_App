@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/adapter"
+	"github.com/NicholasLiem/IF4031_M1_Ticket_App/adapter/clients"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/app"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/datastruct"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/repository"
@@ -28,6 +29,19 @@ func main() {
 	}
 
 	/**
+	Setting up http client
+	*/
+	clientAPIURL := os.Getenv("BASE_CLIENT_APP_URL")
+	paymentAPIURL := os.Getenv("BASE_PAYMENT_APP_URL")
+	apiIdentifierToken := os.Getenv("TICKET_API_KEY")
+	headers := map[string]string{
+		"Authorization": "Bearer " + apiIdentifierToken,
+		"Content-Type":  "application/json",
+	}
+	restClientToClientApp := clients.NewRestClient(clientAPIURL, headers)
+	restClientToPaymentApp := clients.NewRestClient(paymentAPIURL, headers)
+
+	/**
 	Setting up DB
 	*/
 	db := repository.SetupDB()
@@ -36,8 +50,7 @@ func main() {
 	Registering DAO's and Services
 	*/
 	dao := repository.NewDAO(db)
-	userService := service.NewUserService(dao)
-	authService := service.NewAuthService(dao)
+
 	eventService := service.NewEventService(dao)
 	seatService := service.NewSeatService(dao)
 
@@ -45,8 +58,8 @@ func main() {
 	Registering Services to Server
 	*/
 	server := app.NewMicroservice(
-		userService,
-		authService,
+		*restClientToClientApp,
+		*restClientToPaymentApp,
 		eventService,
 		seatService,
 	)
@@ -54,7 +67,7 @@ func main() {
 	/**
 	Run DB Migration
 	*/
-	datastruct.Migrate(db, &datastruct.Event{}, &datastruct.UserModel{}, &datastruct.Payment{}, &datastruct.Invoice{}, &datastruct.Seat{})
+	datastruct.Migrate(db, &datastruct.Event{}, &datastruct.Payment{}, &datastruct.Invoice{}, &datastruct.Seat{})
 
 	/**
 	Setting up the router
