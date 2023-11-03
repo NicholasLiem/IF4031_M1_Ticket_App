@@ -11,6 +11,7 @@ import (
 
 type DAO interface {
 	NewUserQuery() UserQuery
+	NewEventQuery() EventQuery
 }
 
 type dao struct {
@@ -68,4 +69,8 @@ func SetupDB() *gorm.DB {
 
 func (d *dao) NewUserQuery() UserQuery {
 	return NewUserQuery(d.pgdb)
+}
+
+func (d *dao) NewEventQuery() EventQuery {
+	return NewEventQuery(d.pgdb)
 }
