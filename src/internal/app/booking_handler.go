@@ -14,10 +14,10 @@ import (
 
 func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	// Prepare for response
-	var responseDTO dto.TicketAppBookingResponseDTO
+	var responseDTO dto.BookingResponseDTO
 
 	// Parse incoming request
-	var requestDTO dto.ClientAppBookingRequestDTO
+	var requestDTO dto.IncomingBookingRequestDTO
 	err := json.NewDecoder(r.Body).Decode(&requestDTO)
 	if err != nil {
 		response.ErrorResponse(w, http.StatusBadRequest, messages.InvalidRequestData)
@@ -91,7 +91,7 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var paymentResponseBody dto.PaymentResponseDTO
+	var paymentResponseBody dto.IncomingPaymentResponseDTO
 	if err := json.Unmarshal(dataBytes, &paymentResponseBody); err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, "[505] Error making invoice request")
 		return
@@ -115,7 +115,7 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func sendBookingResponse(w http.ResponseWriter, bookingID uint, customerID uint, eventID uint, seatID uint, status dto.BookingStatus, message string, invoiceID string, paymentURL string, responseDTO dto.TicketAppBookingResponseDTO) {
+func sendBookingResponse(w http.ResponseWriter, bookingID uint, customerID uint, eventID uint, seatID uint, status dto.BookingStatus, message string, invoiceID string, paymentURL string, responseDTO dto.BookingResponseDTO) {
 	responseDTO.BookingID = bookingID
 	responseDTO.CustomerID = customerID
 	responseDTO.EventID = eventID

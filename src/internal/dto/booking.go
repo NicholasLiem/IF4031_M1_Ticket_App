@@ -2,7 +2,7 @@ package dto
 
 //TODO: organize ini dto"nya
 
-type TicketAppBookingResponseDTO struct {
+type BookingResponseDTO struct {
 	InvoiceID  string        `json:"invoice_id,omitempty"`
 	BookingID  uint          `json:"booking_id,omitempty"`
 	EventID    uint          `json:"event_id,omitempty"`
@@ -13,14 +13,14 @@ type TicketAppBookingResponseDTO struct {
 	Message    string        `json:"message,omitempty"`
 }
 
-type ClientAppBookingRequestDTO struct {
+type IncomingBookingRequestDTO struct {
 	BookingID  uint `json:"booking_id,omitempty"`
 	CustomerID uint `json:"customer_id,omitempty"`
 	EventID    uint `json:"event_id,omitempty"`
 	SeatID     uint `json:"seat_id,omitempty"`
 }
 
-type PaymentResponseDTO struct {
+type IncomingPaymentResponseDTO struct {
 	InvoiceID  string `json:"id,omitempty"`
 	BookingID  uint   `json:"bookingID,omitempty"`
 	EventID    uint   `json:"eventID,omitempty"`
