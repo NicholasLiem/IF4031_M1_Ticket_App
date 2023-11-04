@@ -16,7 +16,6 @@ func NewRestClient(baseURL string, headers map[string]string) *RestClient {
 
 func (c *RestClient) Post(path string, payload []byte) (*http.Response, error) {
 	url := c.BaseURL + path
-
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, err

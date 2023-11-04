@@ -2,9 +2,15 @@ package datastruct
 
 import "gorm.io/gorm"
 
-// TODO: Make the routes
+type InvoiceRequest struct {
+	BookingID  uint `json:"booking_id,omitempty"`
+	EventID    uint `json:"event_id,omitempty"`
+	CustomerID uint `json:"customer_id,omitempty"`
+}
+
 type Invoice struct {
 	gorm.Model
+	InvoiceID     string        `json:"id,omitempty"`
 	BookingID     uint          `json:"booking_id,omitempty"`
 	EventID       uint          `json:"event_id,omitempty"`
 	CustomerID    uint          `json:"customer_id,omitempty"`
