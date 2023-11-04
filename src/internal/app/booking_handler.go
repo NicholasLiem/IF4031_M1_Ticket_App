@@ -30,26 +30,26 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	//Check the if event exists
 	existingEvent, err := m.eventService.GetEvent(requestDTO.EventID)
 	if err != nil || existingEvent == nil {
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Event tidak terdaftar", "", "", responseDTO)
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Event tidak terdaftar", "", "", requestDTO.Email, responseDTO)
 		return
 	}
 
 	//Check the status of the seat
 	existingSeat, err := m.seatService.GetSeat(requestDTO.SeatID)
 	if err != nil {
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak terdaftar.", "", "", responseDTO)
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak terdaftar.", "", "", requestDTO.Email, responseDTO)
 		return
 	}
 
 	//Return if the seat status is not open
 	if existingSeat.Status != datastruct.OPEN {
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak open.", "", "", responseDTO)
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak open.", "", "", requestDTO.Email, responseDTO)
 		return
 	}
 
 	// Simulate a 20% chance of failure
 	if rand.Float32() < 0.2 {
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[Simulated Failure] Booking tidak dapat dilakukan.", "", "", responseDTO)
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[Simulated Failure] Booking tidak dapat dilakukan.", "", "", requestDTO.Email, responseDTO)
 		return
 	}
 
@@ -59,6 +59,7 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 		CustomerID: requestDTO.CustomerID,
 		EventID:    requestDTO.EventID,
 		SeatID:     requestDTO.SeatID,
+		Email:      requestDTO.Email,
 	}
 
 	requestBody, err := json.Marshal(invoiceRequest)
@@ -111,11 +112,11 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Return Status on progress of the booking
-	sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingOnProcess, "Booking kursi berhasil dilakukan. Status kursi sekarang on-going.", paymentResponseBody.InvoiceID, paymentResponseBody.PaymentURL, responseDTO)
+	sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingOnProcess, "Booking kursi berhasil dilakukan. Status kursi sekarang on-going.", paymentResponseBody.InvoiceID, paymentResponseBody.PaymentURL, requestDTO.Email, responseDTO)
 	return
 }
 
-func sendBookingResponse(w http.ResponseWriter, bookingID uint, customerID uint, eventID uint, seatID uint, status dto.BookingStatus, message string, invoiceID string, paymentURL string, responseDTO dto.BookingResponseDTO) {
+func sendBookingResponse(w http.ResponseWriter, bookingID uint, customerID uint, eventID uint, seatID uint, status dto.BookingStatus, message string, invoiceID string, paymentURL string, email string, responseDTO dto.BookingResponseDTO) {
 	responseDTO.BookingID = bookingID
 	responseDTO.CustomerID = customerID
 	responseDTO.EventID = eventID
@@ -124,5 +125,6 @@ func sendBookingResponse(w http.ResponseWriter, bookingID uint, customerID uint,
 	responseDTO.Message = message
 	responseDTO.InvoiceID = invoiceID
 	responseDTO.PaymentURL = paymentURL
+	responseDTO.Email = email
 	response.SuccessResponse(w, http.StatusOK, messages.SuccessfulDataObtain, responseDTO)
 }
