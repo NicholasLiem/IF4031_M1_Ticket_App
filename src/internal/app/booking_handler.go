@@ -30,26 +30,26 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	//Check the if event exists
 	existingEvent, err := m.eventService.GetEvent(requestDTO.EventID)
 	if err != nil || existingEvent == nil {
-		sendBookingResponse(w, responseDTO, requestDTO.BookingID, requestDTO.CustomerID, "", "", dto.BookingFailed, "Event tidak terdaftar")
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Event tidak terdaftar", "", "", responseDTO)
 		return
 	}
 
 	//Check the status of the seat
 	existingSeat, err := m.seatService.GetSeat(requestDTO.SeatID)
 	if err != nil {
-		sendBookingResponse(w, responseDTO, requestDTO.BookingID, requestDTO.CustomerID, "", "", dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak terdaftar.")
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak terdaftar.", "", "", responseDTO)
 		return
 	}
 
 	//Return if the seat status is not open
 	if existingSeat.Status != datastruct.OPEN {
-		sendBookingResponse(w, responseDTO, requestDTO.BookingID, requestDTO.CustomerID, "", "", dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak open.")
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak open.", "", "", responseDTO)
 		return
 	}
 
 	// Simulate a 20% chance of failure
 	if rand.Float32() < 0.2 {
-		sendBookingResponse(w, responseDTO, requestDTO.BookingID, requestDTO.CustomerID, "", "", dto.BookingFailed, "[Simulated Failure] Booking tidak dapat dilakukan.")
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[Simulated Failure] Booking tidak dapat dilakukan.", "", "", responseDTO)
 		return
 	}
 
@@ -58,6 +58,7 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 		BookingID:  requestDTO.BookingID,
 		CustomerID: requestDTO.CustomerID,
 		EventID:    requestDTO.EventID,
+		SeatID:     requestDTO.SeatID,
 	}
 
 	requestBody, err := json.Marshal(invoiceRequest)
@@ -110,16 +111,18 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Return Status on progress of the booking
-	sendBookingResponse(w, responseDTO, requestDTO.BookingID, requestDTO.CustomerID, paymentResponseBody.InvoiceID, paymentResponseBody.PaymentURL, dto.BookingOnProcess, "Booking kursi berhasil dilakukan. Status kursi sekarang on-going.")
+	sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingOnProcess, "Booking kursi berhasil dilakukan. Status kursi sekarang on-going.", paymentResponseBody.InvoiceID, paymentResponseBody.PaymentURL, responseDTO)
 	return
 }
 
-func sendBookingResponse(w http.ResponseWriter, responseDTO dto.TicketAppBookingResponseDTO, bookingId uint, customerId uint, invoiceId string, paymentURL string, status dto.BookingStatus, message string) {
-	responseDTO.BookingID = bookingId
-	responseDTO.CustomerID = customerId
+func sendBookingResponse(w http.ResponseWriter, bookingID uint, customerID uint, eventID uint, seatID uint, status dto.BookingStatus, message string, invoiceID string, paymentURL string, responseDTO dto.TicketAppBookingResponseDTO) {
+	responseDTO.BookingID = bookingID
+	responseDTO.CustomerID = customerID
+	responseDTO.EventID = eventID
+	responseDTO.SeatID = seatID
 	responseDTO.Status = status
 	responseDTO.Message = message
-	responseDTO.InvoiceID = invoiceId
+	responseDTO.InvoiceID = invoiceID
 	responseDTO.PaymentURL = paymentURL
 	response.SuccessResponse(w, http.StatusOK, messages.SuccessfulDataObtain, responseDTO)
 }
