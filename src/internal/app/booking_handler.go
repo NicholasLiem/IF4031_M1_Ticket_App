@@ -2,14 +2,15 @@ package app
 
 import (
 	"encoding/json"
-	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/datastruct"
-	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
-	response "github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/http"
-	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/messages"
 	"io"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/datastruct"
+	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
+	response "github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/http"
+	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/messages"
 )
 
 func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
@@ -30,20 +31,23 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	//Check the if event exists
 	existingEvent, err := m.eventService.GetEvent(requestDTO.EventID)
 	if err != nil || existingEvent == nil {
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Event tidak terdaftar", "", "", requestDTO.Email, responseDTO)
+		// sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Event tidak terdaftar", "", "", requestDTO.Email, responseDTO)
+		response.ErrorResponse(w, http.StatusNotFound, "Event tidak terdaftar")
 		return
 	}
 
 	//Check the status of the seat
 	existingSeat, err := m.seatService.GetSeat(requestDTO.SeatID)
 	if err != nil {
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak terdaftar.", "", "", requestDTO.Email, responseDTO)
+		// sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak terdaftar.", "", "", requestDTO.Email, responseDTO)
+		response.ErrorResponse(w, http.StatusNotFound, "Booking tidak dapat dilakukan. Kursi tidak terdaftar.")
 		return
 	}
 
 	//Return if the seat status is not open
 	if existingSeat.Status != datastruct.OPEN {
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak open.", "", "", requestDTO.Email, responseDTO)
+		// sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak open.", "", "", requestDTO.Email, responseDTO)
+		response.ErrorResponse(w, http.StatusConflict, "Booking tidak dapat dilakukan. Kursi tidak open.")
 		return
 	}
 
@@ -64,14 +68,16 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 
 	requestBody, err := json.Marshal(invoiceRequest)
 	if err != nil {
-		response.ErrorResponse(w, http.StatusInternalServerError, "[501] Error making invoice request")
+		// response.ErrorResponse(w, http.StatusInternalServerError, "[501] Error making invoice request")
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[501] Error making invoice request", "", "", requestDTO.Email, responseDTO)
 		return
 	}
 
 	externalAPIPath := "/invoice"
 	paymentResponse, err := m.restClientToPaymentApp.Post(externalAPIPath, requestBody)
 	if err != nil {
-		response.ErrorResponse(w, http.StatusInternalServerError, "[502] Payment App is down")
+		// response.ErrorResponse(w, http.StatusInternalServerError, "[502] Payment App is down")
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[502] Payment App is down", "", "", requestDTO.Email, responseDTO)
 		return
 	}
 	defer func(Body io.ReadCloser) {
@@ -82,19 +88,22 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	}(paymentResponse.Body)
 
 	if paymentResponse.StatusCode != http.StatusCreated {
-		response.ErrorResponse(w, http.StatusInternalServerError, "[503] Error making invoice request")
+		// response.ErrorResponse(w, http.StatusInternalServerError, "[503] Error making invoice request")
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[503] Error making invoice request", "", "", requestDTO.Email, responseDTO)
 		return
 	}
 
 	dataBytes, err := response.GetJSONDataBytesFromResponse(paymentResponse)
 	if err != nil {
-		response.ErrorResponse(w, http.StatusInternalServerError, "[504] Error making invoice request")
+		// response.ErrorResponse(w, http.StatusInternalServerError, "[504] Error making invoice request")
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[504] Error making invoice request", "", "", requestDTO.Email, responseDTO)
 		return
 	}
 
 	var paymentResponseBody dto.IncomingPaymentResponseDTO
 	if err := json.Unmarshal(dataBytes, &paymentResponseBody); err != nil {
-		response.ErrorResponse(w, http.StatusInternalServerError, "[505] Error making invoice request")
+		// response.ErrorResponse(w, http.StatusInternalServerError, "[505] Error making invoice request")
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[505] Error making invoice request", "", "", requestDTO.Email, responseDTO)
 		return
 	}
 
@@ -102,12 +111,14 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	existingSeat.Status = datastruct.ONGOING
 	seat, err := m.seatService.UpdateSeat(existingSeat.ID, *existingSeat)
 	if err != nil {
-		response.ErrorResponse(w, http.StatusInternalServerError, "Error updating seat status")
+		// response.ErrorResponse(w, http.StatusInternalServerError, "Error updating seat status")
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Error updating seat status", "", "", requestDTO.Email, responseDTO)
 		return
 	}
 
 	if seat.Status != datastruct.ONGOING {
-		response.ErrorResponse(w, http.StatusInternalServerError, "Error updating seat status")
+		// response.ErrorResponse(w, http.StatusInternalServerError, "Error updating seat status")
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Error updating seat status", "", "", requestDTO.Email, responseDTO)
 		return
 	}
 
