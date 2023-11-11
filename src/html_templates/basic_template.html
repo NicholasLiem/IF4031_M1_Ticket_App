@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <title>E-Booking Notification Service</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .header,
+        .footer {
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        .content {
+            margin: 20px;
+        }
+        .timestamp {
+            text-align: right;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h2>Ticket App Service</h2>
+</div>
+
+<div class="content">
+    <p>Hello,</p>
+    <p>{{.Body}}</p>
+</div>
+
+<div class="timestamp">
+    <p>Sent on: {{.Timestamp}}</p>
+</div>
+
+<div class="footer">
+    <p>Thank you for choosing our service.</p>
+    <p>Contact us at <a href="mailto:support@ticket-app.com">support@ticket-app.com</a></p>
+</div>
+</body>
+</html>
