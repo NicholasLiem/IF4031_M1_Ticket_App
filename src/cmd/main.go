@@ -1,16 +1,19 @@
 package main
 
 import (
+	"flag"
+	"log"
+	"net/http"
+	"os"
+
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/adapter"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/adapter/clients"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/app"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/datastruct"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/repository"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/service"
+	"github.com/NicholasLiem/IF4031_M1_Ticket_App/seeder"
 	"github.com/joho/godotenv"
-	"log"
-	"net/http"
-	"os"
 )
 
 func main() {
@@ -68,6 +71,17 @@ func main() {
 	Run DB Migration
 	*/
 	datastruct.Migrate(db, &datastruct.Event{}, &datastruct.Seat{})
+
+	/**
+	Seeder DB
+	*/
+	seedFlag := flag.Bool("seed", false, "Seed the database")
+	flag.Parse()
+
+	if *seedFlag {
+		log.Println("Seeding the database...")
+		seeder.Seed(db)
+	}
 
 	/**
 	Setting up the router

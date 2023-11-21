@@ -5,12 +5,12 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
-	"time"
 
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/datastruct"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
 	response "github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/http"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/messages"
+	uuid "github.com/satori/go.uuid"
 )
 
 func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
@@ -26,28 +26,28 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Simulate a call that takes 2 seconds
-	time.Sleep(2 * time.Second)
+	// time.Sleep(2 * time.Second)
 
-	//Check the if event exists
-	existingEvent, err := m.eventService.GetEvent(requestDTO.EventID)
-	if err != nil || existingEvent == nil {
+	// Check the if event exists
+	_, httpError := m.eventService.GetEvent(requestDTO.EventID)
+	if httpError != nil {
 		// sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Event tidak terdaftar", "", "", requestDTO.Email, responseDTO)
-		response.ErrorResponse(w, http.StatusNotFound, "Event tidak terdaftar")
+		response.ErrorResponse(w, httpError.StatusCode, httpError.Message)
 		return
 	}
 
-	//Check the status of the seat
+	// Check the status of the seat
 	existingSeat, err := m.seatService.GetSeat(requestDTO.SeatID)
-	if err != nil {
+	if err != nil || existingSeat.EventID != requestDTO.EventID {
 		// sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak terdaftar.", "", "", requestDTO.Email, responseDTO)
-		response.ErrorResponse(w, http.StatusNotFound, "Booking tidak dapat dilakukan. Kursi tidak terdaftar.")
+		response.ErrorResponse(w, http.StatusNotFound, "Booking can't be done. Seat does not exists.")
 		return
 	}
 
-	//Return if the seat status is not open
+	//Return if the seat status does not open
 	if existingSeat.Status != datastruct.OPEN {
 		// sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak open.", "", "", requestDTO.Email, responseDTO)
-		response.ErrorResponse(w, http.StatusConflict, "Booking tidak dapat dilakukan. Kursi tidak open.")
+		response.ErrorResponse(w, http.StatusConflict, "Booking can't be done. Seat does not open.")
 		return
 	}
 
@@ -122,12 +122,16 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// response.ErrorResponse(w, http.StatusConflict, "test.")
+	// response.SuccessResponse(w, http.StatusOK, messages.SuccessfulDataObtain, nil)
+	// return
+
 	//Return Status on progress of the booking
-	sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingOnProcess, "Booking kursi berhasil dilakukan. Status kursi sekarang on-going.", paymentResponseBody.InvoiceID, paymentResponseBody.PaymentURL, requestDTO.Email, responseDTO)
+	sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingOnProcess, "Booking success. Seat's status now is on-going.", paymentResponseBody.InvoiceID, paymentResponseBody.PaymentURL, requestDTO.Email, responseDTO)
 	return
 }
 
-func sendBookingResponse(w http.ResponseWriter, bookingID uint, customerID uint, eventID uint, seatID uint, status dto.BookingStatus, message string, invoiceID string, paymentURL string, email string, responseDTO dto.BookingResponseDTO) {
+func sendBookingResponse(w http.ResponseWriter, bookingID uuid.UUID, customerID uint, eventID uint, seatID uint, status dto.BookingStatus, message string, invoiceID string, paymentURL string, email string, responseDTO dto.BookingResponseDTO) {
 	responseDTO.BookingID = bookingID
 	responseDTO.CustomerID = customerID
 	responseDTO.EventID = eventID
