@@ -2,13 +2,14 @@ package app
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/datastruct"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils"
 	response "github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/http"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/messages"
 	"github.com/gorilla/mux"
-	"net/http"
 )
 
 func (m *MicroserviceServer) CreateSeat(w http.ResponseWriter, r *http.Request) {
@@ -143,9 +144,9 @@ func (m *MicroserviceServer) GetSeatsForEvent(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	event, err := m.eventService.GetEvent(*parsedEventID)
-	if err != nil || event == nil {
-		response.ErrorResponse(w, http.StatusNotFound, messages.DataNotFound)
+	event, httpError := m.eventService.GetEvent(*parsedEventID)
+	if httpError != nil || event == nil {
+		response.ErrorResponse(w, httpError.StatusCode, httpError.Message)
 		return
 	}
 

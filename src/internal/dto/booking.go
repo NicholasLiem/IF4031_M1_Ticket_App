@@ -1,8 +1,10 @@
 package dto
 
+import uuid "github.com/satori/go.uuid"
+
 type BookingResponseDTO struct {
 	InvoiceID  string        `json:"invoice_id,omitempty"`
-	BookingID  uint          `json:"booking_id,omitempty"`
+	BookingID  uuid.UUID     `json:"booking_id,omitempty"`
 	EventID    uint          `json:"event_id,omitempty"`
 	SeatID     uint          `json:"seat_id,omitempty"`
 	Email      string        `json:"email,omitempty"`
@@ -13,21 +15,22 @@ type BookingResponseDTO struct {
 }
 
 type IncomingBookingRequestDTO struct {
-	BookingID  uint   `json:"booking_id,omitempty"`
-	CustomerID uint   `json:"customer_id,omitempty"`
-	EventID    uint   `json:"event_id,omitempty"`
-	SeatID     uint   `json:"seat_id,omitempty"`
-	Email      string `json:"email,omitempty"`
+	BookingID  uuid.UUID `json:"booking_id,omitempty"`
+	CustomerID uint      `json:"customer_id,omitempty"`
+	EventID    uint      `json:"event_id,omitempty"`
+	SeatID     uint      `json:"seat_id,omitempty"`
+	Email      string    `json:"email,omitempty"`
 }
 
 type IncomingPaymentResponseDTO struct {
-	InvoiceID  string `json:"id,omitempty"`
-	CustomerID uint   `json:"customerID,omitempty"`
-	BookingID  uint   `json:"bookingID,omitempty"`
-	EventID    uint   `json:"eventID,omitempty"`
-	SeatID     uint   `json:"seatID,omitempty"`
-	Email      string `json:"email,omitempty"`
-	PaymentURL string `json:"paymentURL,omitempty"`
+	InvoiceID     string        `json:"id,omitempty"`
+	CustomerID    uint          `json:"customerID,omitempty"`
+	BookingID     uuid.UUID     `json:"bookingID,omitempty"`
+	EventID       uint          `json:"eventID,omitempty"`
+	SeatID        uint          `json:"seatID,omitempty"`
+	Email         string        `json:"email,omitempty"`
+	PaymentURL    string        `json:"paymentURL,omitempty"`
+	PaymentStatus BookingStatus `json:"paymentStatus,omitempty"`
 }
 
 type BookingStatus string

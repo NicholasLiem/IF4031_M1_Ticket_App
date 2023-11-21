@@ -11,6 +11,7 @@ type EventQuery interface {
 	UpdateEvent(eventID uint, event dto.UpdateEventDTO) (*datastruct.Event, error)
 	DeleteEvent(eventID uint) (*datastruct.Event, error)
 	GetEvent(eventID uint) (*datastruct.Event, error)
+	IsEventNameUnique(eventName string, eventID *uint) (bool, error)
 }
 
 type eventQuery struct {
@@ -71,4 +72,21 @@ func (eq *eventQuery) GetEvent(eventID uint) (*datastruct.Event, error) {
 	}
 
 	return &event, nil
+}
+
+func (u *eventQuery) IsEventNameUnique(eventName string, eventID *uint) (bool, error) {
+	// If eventID is provided, exclude it from the query
+	query := u.pgdb.Model(datastruct.Event{}).Where("event_name = ?", eventName)
+	if eventID != nil {
+		query = query.Where("id <> ?", *eventID)
+	}
+
+	// Execute the query to check event name uniqueness
+	var count int64
+	if err := query.Count(&count).Error; err != nil {
+		return false, err
+	}
+
+	// If count is 0, event is unique; otherwise, it's not
+	return count == 0, nil
 }

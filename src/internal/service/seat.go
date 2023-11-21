@@ -27,6 +27,8 @@ func (ss *seatService) CreateSeat(seat datastruct.Seat, eventID uint) (*datastru
 		return nil, err
 	}
 
+	// Check seat number
+
 	seat.EventID = eventID
 	return ss.dao.NewSeatQuery().CreateSeat(seat)
 }

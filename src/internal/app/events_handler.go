@@ -2,14 +2,14 @@ package app
 
 import (
 	"encoding/json"
-	"fmt"
+	"net/http"
+
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/datastruct"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils"
 	response "github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/http"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/messages"
 	"github.com/gorilla/mux"
-	"net/http"
 )
 
 func (m *MicroserviceServer) CreateEvent(w http.ResponseWriter, r *http.Request) {
@@ -29,9 +29,9 @@ func (m *MicroserviceServer) CreateEvent(w http.ResponseWriter, r *http.Request)
 		EventName: newEvent.EventName,
 	}
 
-	createdEvent, err := m.eventService.CreateEvent(eventModel)
-	if err != nil {
-		response.ErrorResponse(w, http.StatusInternalServerError, messages.FailToParseID)
+	createdEvent, httpError := m.eventService.CreateEvent(eventModel)
+	if httpError != nil {
+		response.ErrorResponse(w, httpError.StatusCode, httpError.Message)
 		return
 	}
 
@@ -48,9 +48,9 @@ func (m *MicroserviceServer) DeleteEvent(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	_, err = m.eventService.DeleteEvent(*parsedEventID)
-	if err != nil {
-		response.ErrorResponse(w, http.StatusInternalServerError, messages.FailToDeleteData)
+	_, httpError := m.eventService.DeleteEvent(*parsedEventID)
+	if httpError != nil {
+		response.ErrorResponse(w, httpError.StatusCode, httpError.Message)
 		return
 	}
 
@@ -68,10 +68,9 @@ func (m *MicroserviceServer) GetEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	event, err := m.eventService.GetEvent(*parsedEventID)
-	if err != nil {
-		fmt.Println(err)
-		response.ErrorResponse(w, http.StatusInternalServerError, messages.FailToGetData)
+	event, httpError := m.eventService.GetEvent(*parsedEventID)
+	if httpError != nil {
+		response.ErrorResponse(w, httpError.StatusCode, httpError.Message)
 		return
 	}
 
@@ -96,9 +95,9 @@ func (m *MicroserviceServer) UpdateEvent(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	updatedEvent, err := m.eventService.UpdateEvent(*parsedEventID, updateEvent)
-	if err != nil {
-		response.ErrorResponse(w, http.StatusInternalServerError, messages.FailToUpdateData)
+	updatedEvent, httpError := m.eventService.UpdateEvent(*parsedEventID, updateEvent)
+	if httpError != nil {
+		response.ErrorResponse(w, httpError.StatusCode, httpError.Message)
 		return
 	}
 
