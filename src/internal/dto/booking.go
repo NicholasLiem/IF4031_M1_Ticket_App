@@ -3,7 +3,7 @@ package dto
 import uuid "github.com/satori/go.uuid"
 
 type BookingResponseDTO struct {
-	InvoiceID  string        `json:"invoice_id,omitempty"`
+	InvoiceID  uuid.UUID     `json:"invoice_id,omitempty"`
 	BookingID  uuid.UUID     `json:"booking_id,omitempty"`
 	EventID    uint          `json:"event_id,omitempty"`
 	SeatID     uint          `json:"seat_id,omitempty"`
@@ -23,7 +23,7 @@ type IncomingBookingRequestDTO struct {
 }
 
 type IncomingPaymentResponseDTO struct {
-	InvoiceID     string        `json:"id,omitempty"`
+	InvoiceID     uuid.UUID     `json:"id,omitempty"`
 	CustomerID    uint          `json:"customerID,omitempty"`
 	BookingID     uuid.UUID     `json:"bookingID,omitempty"`
 	EventID       uint          `json:"eventID,omitempty"`

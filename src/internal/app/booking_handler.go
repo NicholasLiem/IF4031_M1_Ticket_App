@@ -53,7 +53,7 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 
 	// Simulate a 20% chance of failure
 	if rand.Float32() < 0.2 {
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[Simulated Failure] Booking tidak dapat dilakukan.", "", "", requestDTO.Email, responseDTO)
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[Simulated Failure] Booking tidak dapat dilakukan.", uuid.Nil, "", requestDTO.Email, responseDTO)
 		return
 	}
 
@@ -69,7 +69,7 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	requestBody, err := json.Marshal(invoiceRequest)
 	if err != nil {
 		// response.ErrorResponse(w, http.StatusInternalServerError, "[501] Error making invoice request")
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[501] Error making invoice request", "", "", requestDTO.Email, responseDTO)
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[501] Error making invoice request", uuid.Nil, "", requestDTO.Email, responseDTO)
 		return
 	}
 
@@ -77,7 +77,7 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	paymentResponse, err := m.restClientToPaymentApp.Post(externalAPIPath, requestBody)
 	if err != nil {
 		// response.ErrorResponse(w, http.StatusInternalServerError, "[502] Payment App is down")
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[502] Payment App is down", "", "", requestDTO.Email, responseDTO)
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[502] Payment App is down", uuid.Nil, "", requestDTO.Email, responseDTO)
 		return
 	}
 	defer func(Body io.ReadCloser) {
@@ -89,21 +89,21 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 
 	if paymentResponse.StatusCode != http.StatusCreated {
 		// response.ErrorResponse(w, http.StatusInternalServerError, "[503] Error making invoice request")
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[503] Error making invoice request", "", "", requestDTO.Email, responseDTO)
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[503] Error making invoice request", uuid.Nil, "", requestDTO.Email, responseDTO)
 		return
 	}
 
 	dataBytes, err := response.GetJSONDataBytesFromResponse(paymentResponse)
 	if err != nil {
 		// response.ErrorResponse(w, http.StatusInternalServerError, "[504] Error making invoice request")
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[504] Error making invoice request", "", "", requestDTO.Email, responseDTO)
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[504] Error making invoice request", uuid.Nil, "", requestDTO.Email, responseDTO)
 		return
 	}
 
 	var paymentResponseBody dto.IncomingPaymentResponseDTO
 	if err := json.Unmarshal(dataBytes, &paymentResponseBody); err != nil {
 		// response.ErrorResponse(w, http.StatusInternalServerError, "[505] Error making invoice request")
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[505] Error making invoice request", "", "", requestDTO.Email, responseDTO)
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "[505] Error making invoice request", uuid.Nil, "", requestDTO.Email, responseDTO)
 		return
 	}
 
@@ -112,13 +112,13 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	seat, err := m.seatService.UpdateSeat(existingSeat.ID, *existingSeat)
 	if err != nil {
 		// response.ErrorResponse(w, http.StatusInternalServerError, "Error updating seat status")
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Error updating seat status", "", "", requestDTO.Email, responseDTO)
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Error updating seat status", uuid.Nil, "", requestDTO.Email, responseDTO)
 		return
 	}
 
 	if seat.Status != datastruct.ONGOING {
 		// response.ErrorResponse(w, http.StatusInternalServerError, "Error updating seat status")
-		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Error updating seat status", "", "", requestDTO.Email, responseDTO)
+		sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Error updating seat status", uuid.Nil, "", requestDTO.Email, responseDTO)
 		return
 	}
 
@@ -131,7 +131,7 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func sendBookingResponse(w http.ResponseWriter, bookingID uuid.UUID, customerID uint, eventID uint, seatID uint, status dto.BookingStatus, message string, invoiceID string, paymentURL string, email string, responseDTO dto.BookingResponseDTO) {
+func sendBookingResponse(w http.ResponseWriter, bookingID uuid.UUID, customerID uint, eventID uint, seatID uint, status dto.BookingStatus, message string, invoiceID uuid.UUID, paymentURL string, email string, responseDTO dto.BookingResponseDTO) {
 	responseDTO.BookingID = bookingID
 	responseDTO.CustomerID = customerID
 	responseDTO.EventID = eventID
