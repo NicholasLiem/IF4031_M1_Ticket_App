@@ -33,3 +33,23 @@ func (c *RestClient) Post(path string, payload []byte) (*http.Response, error) {
 
 	return response, nil
 }
+
+func (c *RestClient) Put(path string, payload []byte) (*http.Response, error) {
+	url := c.BaseURL + path
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(payload))
+	if err != nil {
+		return nil, err
+	}
+
+	for key, value := range c.Headers {
+		req.Header.Set(key, value)
+	}
+
+	client := &http.Client{}
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
