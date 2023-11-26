@@ -131,6 +131,57 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func (m *MicroserviceServer) CancelSeat(w http.ResponseWriter, r *http.Request) {
+	// Prepare for response
+	var requestDTO dto.IncomingCancelRequestDTO
+	
+	err := json.NewDecoder(r.Body).Decode(&requestDTO)
+	if(err != nil){
+		if err != nil {
+			response.ErrorResponse(w, http.StatusBadRequest, messages.InvalidRequestData)
+			return
+		}
+	}
+	invoiceRequest := datastruct.CancelInvoiceRequest{
+		BookingID:  requestDTO.BookingID,
+	}
+	requestBody, err := json.Marshal(invoiceRequest)
+	
+	if err != nil {
+		response.ErrorResponse(w,http.StatusBadRequest,"Invalid request body")
+		return
+	}
+	externalAPIPath := "/invoice/cancel/" + invoiceRequest.BookingID.String()
+	paymentResponse,err := m.restClientToPaymentApp.Put(externalAPIPath,requestBody)
+	
+	if(err != nil){
+		response.ErrorResponse(w,http.StatusInternalServerError,"[500] Connection refused")
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			return
+		}
+	}(paymentResponse.Body)
+	// fmt.Println(paymentResponse)
+	if paymentResponse.StatusCode != http.StatusOK {
+		response.ErrorResponse(w,http.StatusNotFound,"[500] Error canceling invoice");
+		return
+	}
+
+	dataBytes, err := response.GetJSONDataBytesFromResponse(paymentResponse)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, "[504] Error canceling invoice")
+		return
+	}
+
+	var paymentResponseBody dto.IncomingPaymentResponseDTO
+	if err := json.Unmarshal(dataBytes, &paymentResponseBody); err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, "[505] Error canceling invoice")
+		return
+	}
+	response.SuccessResponse(w,http.StatusOK,"Your payment has been cancelled!",requestDTO.BookingID)
+}
 func sendBookingResponse(w http.ResponseWriter, bookingID uuid.UUID, customerID uint, eventID uint, seatID uint, status dto.BookingStatus, message string, invoiceID uuid.UUID, paymentURL string, email string, responseDTO dto.BookingResponseDTO) {
 	responseDTO.BookingID = bookingID
 	responseDTO.CustomerID = customerID

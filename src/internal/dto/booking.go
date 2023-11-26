@@ -22,6 +22,10 @@ type IncomingBookingRequestDTO struct {
 	Email      string    `json:"email,omitempty"`
 }
 
+type IncomingCancelRequestDTO struct{
+	BookingID uuid.UUID 	`json:"booking_id,omitempty"`
+}
+
 type IncomingPaymentResponseDTO struct {
 	InvoiceID     uuid.UUID     `json:"id,omitempty"`
 	CustomerID    uint          `json:"customerID,omitempty"`

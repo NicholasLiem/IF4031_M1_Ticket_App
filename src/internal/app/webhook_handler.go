@@ -24,11 +24,12 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 
 	//Check the status
 	status := incomingInvoicePayload.PaymentStatus == datastruct.SUCCESS
+	fmt.Println(incomingInvoicePayload)
 	if !status {
 		//Create PDF with QR Code
 		fmt.Println("Making the QR...")
 		fmt.Println("Making the PDF...")
-		// response.SuccessResponse(w, http.StatusOK, "Payment FAILED", nil)
+		response.SuccessResponse(w, http.StatusOK, "Payment FAILED", nil)
 
 		// Call webhook in Client App
 		// Create Invoice To Client
@@ -67,7 +68,7 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 		response.SuccessResponse(w, http.StatusOK, "Webhook response: "+paymentResponse.Status, nil)
 		return
 	}
-
+	fmt.Println("Sebelom newSeatStatus")
 	//Update seat status to booked if status success
 	newSeatStatus := datastruct.Seat{
 		Status: datastruct.BOOKED,
@@ -127,11 +128,14 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 	}
 
 	externalAPIPath := "/webhook"
+	fmt.Println("Masuk sebelom rest client")
 	paymentResponse, err := m.restClientToClientApp.Put(externalAPIPath, requestBody)
 	if err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, "[502] Payment App is down")
 		return
 	}
+	fmt.Println("Masuk setelah rest client")
+	fmt.Println(paymentResponse)
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -146,4 +150,16 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 
 	response.SuccessResponse(w, http.StatusOK, "Webhook response: "+paymentResponse.Status, nil)
 	return
+}
+func (m *MicroserviceServer) WebhookCancelTicketHandler(w http.ResponseWriter, r *http.Request) {
+	var incomingInvoicePayload dto.IncomingInvoicePayload
+	err := json.NewDecoder(r.Body).Decode(&incomingInvoicePayload)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, messages.InvalidRequestData)
+		return
+	}
+	//Check the status
+	status := incomingInvoicePayload.PaymentStatus == datastruct.SUCCESS
+	fmt.Print(status)
+	response.SuccessResponse(w,http.StatusOK,"Webhook is called",nil)	
 }

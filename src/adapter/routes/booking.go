@@ -16,6 +16,13 @@ func BookingRoutes(server app.MicroserviceServer) structs.RoutePrefix {
 				server.BookSeat,
 				true,
 			},
+			{
+				"Cancel Seat",
+				"POST",
+				"/cancel",
+				server.CancelSeat,
+				true,
+			},
 		},
 	}
 }

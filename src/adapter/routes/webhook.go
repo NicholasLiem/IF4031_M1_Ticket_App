@@ -16,6 +16,13 @@ func WebhookRoutes(server app.MicroserviceServer) structs.RoutePrefix {
 				server.WebhookPaymentHandler,
 				true,
 			},
+			{
+				"Incoming webhook from payment app",
+				"POST",
+				"cancel",
+				server.WebhookCancelTicketHandler,
+				true,
+			},
 		},
 	}
 }

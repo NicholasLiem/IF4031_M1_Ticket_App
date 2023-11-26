@@ -10,6 +10,10 @@ type InvoiceRequest struct {
 	Email      string    `json:"email,omitempty"`
 }
 
+type CancelInvoiceRequest struct{
+	BookingID	uuid.UUID	`json:"booking_id,omitempty"`
+}
+
 type PaymentStatus string
 
 const (
