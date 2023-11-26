@@ -23,7 +23,8 @@ type IncomingBookingRequestDTO struct {
 }
 
 type IncomingCancelRequestDTO struct{
-	BookingID uuid.UUID 	`json:"booking_id,omitempty"`
+	BookingID 	uuid.UUID 	`json:"booking_id,omitempty"`
+	SeatID     	uint      	`json:"seat_id,omitempty"`
 }
 
 type IncomingPaymentResponseDTO struct {

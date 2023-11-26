@@ -122,7 +122,6 @@ func (m *MicroserviceServer) BookSeat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// response.ErrorResponse(w, http.StatusConflict, "test.")
 	// response.SuccessResponse(w, http.StatusOK, messages.SuccessfulDataObtain, nil)
 	// return
 
@@ -151,6 +150,14 @@ func (m *MicroserviceServer) CancelSeat(w http.ResponseWriter, r *http.Request) 
 		response.ErrorResponse(w,http.StatusBadRequest,"Invalid request body")
 		return
 	}
+
+	existingSeat, err := m.seatService.GetSeat(requestDTO.SeatID)
+	if err != nil {
+		// sendBookingResponse(w, requestDTO.BookingID, requestDTO.CustomerID, requestDTO.EventID, requestDTO.SeatID, dto.BookingFailed, "Booking tidak dapat dilakukan. Kursi tidak terdaftar.", "", "", requestDTO.Email, responseDTO)
+		response.ErrorResponse(w, http.StatusNotFound, "Booking can't be done. Seat does not exists.")
+		return
+	}
+
 	externalAPIPath := "/invoice/cancel/" + invoiceRequest.BookingID.String()
 	paymentResponse,err := m.restClientToPaymentApp.Put(externalAPIPath,requestBody)
 	
@@ -180,6 +187,18 @@ func (m *MicroserviceServer) CancelSeat(w http.ResponseWriter, r *http.Request) 
 		response.ErrorResponse(w, http.StatusInternalServerError, "[505] Error canceling invoice")
 		return
 	}
+	existingSeat.Status = datastruct.OPEN
+	seat, err := m.seatService.UpdateSeat(requestDTO.SeatID,*existingSeat)
+	
+	if err != nil{
+		response.ErrorResponse(w,http.StatusInternalServerError,"Error updating seat status")
+		return
+	}
+	if seat.Status != datastruct.OPEN{
+		response.ErrorResponse(w,http.StatusInternalServerError,"Error updating seat status")
+		return
+	}
+
 	response.SuccessResponse(w,http.StatusOK,"Your payment has been cancelled!",requestDTO.BookingID)
 }
 func sendBookingResponse(w http.ResponseWriter, bookingID uuid.UUID, customerID uint, eventID uint, seatID uint, status dto.BookingStatus, message string, invoiceID uuid.UUID, paymentURL string, email string, responseDTO dto.BookingResponseDTO) {
