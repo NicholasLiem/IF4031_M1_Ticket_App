@@ -14,7 +14,7 @@ RUN go mod download
 COPY ./src .
 
 #Compiling app
-RUN CGO_ENABLED=0 GOOS=linux go build -o /client-app ./cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o /ticket-app ./cmd/main.go
 
 
 # Deploy Stage
@@ -22,7 +22,7 @@ FROM alpine:latest
 
 WORKDIR /
 
-COPY --from=BuildStage /client-app /client-app
+COPY --from=BuildStage /ticket-app /ticket-app
 
 COPY /src/.env .
 
@@ -34,4 +34,4 @@ RUN addgroup -g 1000 nonroot && adduser -u 1000 -G nonroot -s /bin/sh -D nonroot
 USER nonroot
 
 #Running the app
-CMD ["/client-app"]
+CMD ["/ticket-app"]
