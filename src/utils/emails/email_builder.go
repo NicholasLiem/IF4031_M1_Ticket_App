@@ -5,13 +5,14 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
-	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils"
-	"github.com/jordan-wright/email"
 	"html/template"
 	"net/smtp"
 	"os"
 	"time"
+
+	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
+	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils"
+	"github.com/jordan-wright/email"
 )
 
 // this fix of auth method, I get from here:

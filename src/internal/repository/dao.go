@@ -3,13 +3,14 @@ package repository
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+	"strconv"
+
 	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
-	"os"
-	"strconv"
 )
 
 type DAO interface {
