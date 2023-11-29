@@ -58,7 +58,7 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 	if !status {
 		emailMetaData.EmailSubject = "Ticket App - Payment Failed"
 		emailMetaData.BodyMessage = "Your payment failed, please make a new booking."
-		err = emails.SendEmail(emailMetaData)
+		err = emails.SendEmail(emailMetaData, false)
 		if err != nil {
 			response.ErrorResponse(w, http.StatusInternalServerError, "Fail to send email")
 		}
@@ -86,7 +86,7 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 			// Send email notification about the failure to update seat status
 			emailMetaData.EmailSubject = "Ticket App - Seat Update Failed"
 			emailMetaData.BodyMessage = "Failed to update seat status, please contact the administrator."
-			err = emails.SendEmail(emailMetaData)
+			err = emails.SendEmail(emailMetaData, false)
 			if err != nil {
 				fmt.Println("Fail to send email about seat update failure:", err)
 			}
@@ -153,7 +153,7 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 		// Send email notification about the failure to update seat status
 		emailMetaData.EmailSubject = "Ticket App - Seat Update Failed"
 		emailMetaData.BodyMessage = "Failed to update seat status, please contact the administrator."
-		err = emails.SendEmail(emailMetaData)
+		err = emails.SendEmail(emailMetaData, false)
 		if err != nil {
 			fmt.Println("Fail to send email about seat update failure:", err)
 		}
@@ -163,7 +163,7 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 	//Send to user email?
 	emailMetaData.EmailSubject = "Ticket App - Payment Success"
 	emailMetaData.BodyMessage = "Payment is successful, here is the attached pdf for your booking"
-	err = emails.SendEmail(emailMetaData)
+	err = emails.SendEmail(emailMetaData, true)
 	if err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, "Fail to send email")
 	}

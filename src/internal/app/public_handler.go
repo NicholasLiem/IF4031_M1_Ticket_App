@@ -13,7 +13,7 @@ import (
 func (m *MicroserviceServer) SendEmailPublic(w http.ResponseWriter, r *http.Request) {
 
 	emailMetaData := dto.NewEmailMetaData(
-		"nicholasliem01@gmail.com",
+		"xxxxxxxx.com",
 		"Email Subject",
 		"This is the body message",
 		"html_templates/basic_template.html",
@@ -25,7 +25,7 @@ func (m *MicroserviceServer) SendEmailPublic(w http.ResponseWriter, r *http.Requ
 		"booking-qr",
 	)
 
-	err := emails.SendEmail(emailMetaData)
+	err := emails.SendEmail(emailMetaData, true)
 	if err != nil {
 		fmt.Println(err)
 		response.ErrorResponse(w, http.StatusInternalServerError, "Fail to send email")

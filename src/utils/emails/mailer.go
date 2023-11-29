@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func SendEmail(emailMetaData *dto.EmailMetaData) error {
+func SendEmail(emailMetaData *dto.EmailMetaData, attachPDF bool) error {
 
 	emailData := EmailData{
 		Name: "Customer",
@@ -17,8 +17,11 @@ func SendEmail(emailMetaData *dto.EmailMetaData) error {
 		From(os.Getenv("SENDER_EMAIL")).
 		To([]string{emailMetaData.ReceiverEmailAddress}).
 		Subject(emailMetaData.EmailSubject).
-		HTMLBodyFromFile(emailMetaData.HTMLFilePath, emailData).
-		AttachPDFWithQRCode(emailMetaData.ContentDetails, emailMetaData.ContentDetails.FileName)
+		HTMLBodyFromFile(emailMetaData.HTMLFilePath, emailData)
+
+	if attachPDF {
+		builder = builder.AttachPDFWithQRCode(emailMetaData.ContentDetails, emailMetaData.ContentDetails.FileName)
+	}
 
 	err := builder.Send()
 	if err != nil {
