@@ -3,9 +3,11 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/emails"
 	"io"
 	"math"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/datastruct"
@@ -22,13 +24,35 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
+	//find event name
+	eventData, httpError := m.eventService.GetEvent(incomingInvoicePayload.EventID)
+	if httpError != nil {
+		response.ErrorResponse(w, http.StatusNotFound, "Event data not found for this event id")
+		return
+	}
+
+	emailMetaData := dto.NewEmailMetaData(
+		incomingInvoicePayload.Email,
+		"",
+		"",
+		"html_templates/basic_template.html",
+		incomingInvoicePayload.InvoiceID.String()+"-booking-details",
+		eventData.EventName,
+		strconv.Itoa(int(incomingInvoicePayload.SeatID)),
+		incomingInvoicePayload.Email,
+		eventData.EventDate.String(),
+		incomingInvoicePayload.BookingID.String())
+
 	//Check the status
 	status := incomingInvoicePayload.PaymentStatus == datastruct.SUCCESS
 	if !status {
-		//Create PDF with QR Code
-		fmt.Println("Making the QR...")
-		fmt.Println("Making the PDF...")
-		response.SuccessResponse(w, http.StatusOK, "Payment FAILED", nil)
+
+		emailMetaData.EmailSubject = "Ticket App - Payment Failed"
+		emailMetaData.BodyMessage = "Your payment failed, please make a new booking."
+		err = emails.SendEmail(emailMetaData)
+		if err != nil {
+			response.ErrorResponse(w, http.StatusInternalServerError, "Fail to send email")
+		}
 
 		// Call webhook in Client App
 		// Create Invoice To Client
@@ -67,6 +91,7 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 		response.SuccessResponse(w, http.StatusOK, "Webhook response: "+paymentResponse.Status, nil)
 		return
 	}
+
 	//Update seat status to booked if status success
 	newSeatStatus := datastruct.Seat{
 		Status: datastruct.BOOKED,
@@ -75,37 +100,35 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 	// Retry attempt if update seat status is failed
 	// Simple mechanism
 	attemptCount := 3
+	var updateSeatErr error
 
 	for i := 0; i < attemptCount; i++ {
-		_, updateSeatErr := m.seatService.UpdateSeat(incomingInvoicePayload.SeatID, newSeatStatus)
+		_, updateSeatErr = m.seatService.UpdateSeat(incomingInvoicePayload.SeatID, newSeatStatus)
 		if updateSeatErr == nil {
-			// If seat update is successful or no error occurs, break out of the loop
 			break
 		}
-
-		fmt.Println(err)
-		fmt.Println("Making the QR...")
-		fmt.Println("Making the PDF...")
 		fmt.Println("Update seat failed, retrying...")
-
-		// Wait for a while before retrying
 		time.Sleep(time.Duration(math.Pow(2, float64(i))) * time.Second)
 	}
 
-	// _, err = m.seatService.UpdateSeat(incomingInvoicePayload.SeatID, newSeatStatus)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	fmt.Println("Making the QR...")
-	// 	fmt.Println("Making the PDF...")
-	// 	response.SuccessResponse(w, http.StatusOK, "Update seat failed", nil)
-	// }
-
-	//Create PDF with QR Code
-	fmt.Println("Making the QR...")
-	fmt.Println("Making the PDF...")
+	if updateSeatErr != nil {
+		// Send email notification about the failure to update seat status
+		emailMetaData.EmailSubject = "Ticket App - Seat Update Failed"
+		emailMetaData.BodyMessage = "Failed to update seat status, please contact the administrator."
+		err = emails.SendEmail(emailMetaData)
+		if err != nil {
+			fmt.Println("Fail to send email about seat update failure:", err)
+		}
+		return
+	}
 
 	//Send to user email?
-	fmt.Println(incomingInvoicePayload.BookingID)
+	emailMetaData.EmailSubject = "Ticket App - Payment Success"
+	emailMetaData.BodyMessage = "Payment is successful, please kindly check your email"
+	err = emails.SendEmail(emailMetaData)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, "Fail to send email")
+	}
 
 	// response.SuccessResponse(w, http.StatusOK, "Test", incomingInvoicePayload)
 
