@@ -3,28 +3,33 @@
 ## API Endpoints
 
 ### Event Endpoints
-| HTTP Method | Endpoint                          | Description          |
-| ----------- | --------------------------------- | -------------------- |
-| POST        | `{{base_ticket_url}}/v1/event`    | Create New Event     |
-| DELETE      | `{{base_ticket_url}}/event/:event_id`     | Delete an event      |
-| PUT         | `{{base_ticket_url}}/event/:event_id`     | Update event by id   |
-| GET         | `{{base_ticket_url}}/event/:event_id`     | Get Event by id      |
+| HTTP Method | Endpoint                              | Description        |
+|-------------|---------------------------------------|--------------------|
+| POST        | `{{base_ticket_url}}/v1/event`        | Create New Event   |
+| DELETE      | `{{base_ticket_url}}/event/:event_id` | Delete an event    |
+| PUT         | `{{base_ticket_url}}/event/:event_id` | Update event by id |
+| GET         | `{{base_ticket_url}}/event/:event_id` | Get Event by id    |
 
 ### Seat Endpoints
-| HTTP Method | Endpoint                                   | Description              |
-| ----------- | ------------------------------------------ | ------------------------ |
-| POST        | `{{base_ticket_url}}/seat/1`               | Create New Seat          |
-| GET         | `{{base_ticket_url}}/event/:event_id/seats` | Get Seat from Event Id   |
+| HTTP Method | Endpoint                                    | Description            |
+|-------------|---------------------------------------------|------------------------|
+| POST        | `{{base_ticket_url}}/seat/1`                | Create New Seat        |
+| GET         | `{{base_ticket_url}}/event/:event_id/seats` | Get Seat from Event Id |
 
 ### Public Endpoints
-| HTTP Method | Endpoint                        | Description   |
-| ----------- | ------------------------------- | ------------- |
-| POST        | `{{base_ticket_url}}/public`    | Send Email    |
+| HTTP Method | Endpoint                     | Description |
+|-------------|------------------------------|-------------|
+| POST        | `{{base_ticket_url}}/public` | Send Email  |
+
+### Booking Endpoints
+| HTTP Method | Endpoint                          | Description      |
+|-------------|-----------------------------------|------------------|
+| POST        | `{{base_ticket_url}}/book/cancel` | Cancel a booking |
 
 ### Webhook Endpoints
-| HTTP Method | Endpoint                          | Description   |
-| ----------- | --------------------------------- | ------------- |
-| POST        | `{{base_ticket_url}}/webhook`     | Webhook       |
+| HTTP Method | Endpoint                      | Description |
+|-------------|-------------------------------|-------------|
+| POST        | `{{base_ticket_url}}/webhook` | Webhook     |
 
 ## Notes
 
