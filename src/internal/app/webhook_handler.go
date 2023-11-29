@@ -31,6 +31,15 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
+	layout := "2006-01-02 15:04:05.999999 -0700 MST"
+	parsedTime, err := time.Parse(layout, eventData.CreatedAt.String())
+	if err != nil {
+		fmt.Println("Error parsing time:", err)
+		response.ErrorResponse(w, http.StatusInternalServerError, "Internal server error")
+		return
+	}
+	formattedDate := parsedTime.Format("2006-01-02")
+
 	emailMetaData := dto.NewEmailMetaData(
 		incomingInvoicePayload.Email,
 		"",
@@ -40,7 +49,7 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 		eventData.EventName,
 		strconv.Itoa(int(incomingInvoicePayload.SeatID)),
 		incomingInvoicePayload.Email,
-		eventData.EventDate.String(),
+		formattedDate,
 		incomingInvoicePayload.BookingID.String())
 
 	//Check the status
@@ -124,7 +133,7 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 
 	//Send to user email?
 	emailMetaData.EmailSubject = "Ticket App - Payment Success"
-	emailMetaData.BodyMessage = "Payment is successful, please kindly check your email"
+	emailMetaData.BodyMessage = "Payment is successful, here is the attached pdf for your booking"
 	err = emails.SendEmail(emailMetaData)
 	if err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, "Fail to send email")
