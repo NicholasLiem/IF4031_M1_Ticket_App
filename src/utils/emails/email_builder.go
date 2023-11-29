@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils"
 	"github.com/jordan-wright/email"
 	"html/template"
@@ -48,6 +49,7 @@ type EmailBuilder struct {
 
 type EmailData struct {
 	Timestamp string
+	Name      string
 	Body      string
 }
 
@@ -116,6 +118,24 @@ func (eb *EmailBuilder) AttachQRCode(content string) *EmailBuilder {
 	}
 
 	return eb
+}
+
+func (eb *EmailBuilder) AttachPDFBuffer(pdfBuf *bytes.Buffer, fileName string) *EmailBuilder {
+	_, err := eb.mail.Attach(bytes.NewReader(pdfBuf.Bytes()), fileName, "application/pdf")
+	if err != nil {
+		fmt.Printf("Error attaching PDF: %s\n", err.Error())
+	}
+	return eb
+}
+
+func (eb *EmailBuilder) AttachPDFWithQRCode(pdfData dto.EventPDF, fileName string) *EmailBuilder {
+	pdfBuf, err := utils.GeneratePDFWithQRCode(pdfData)
+	if err != nil {
+		fmt.Printf("Error generating PDF with QR Code: %s\n", err.Error())
+		return eb
+	}
+
+	return eb.AttachPDFBuffer(pdfBuf, fileName)
 }
 
 func (eb *EmailBuilder) Send() error {

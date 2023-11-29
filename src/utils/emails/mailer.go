@@ -2,21 +2,23 @@ package emails
 
 import (
 	"fmt"
+	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
 	"os"
 )
 
-func SendEmail(receiverEmailAddress string, subject string, htmlFilePath string) error {
+func SendEmail(emailMetaData *dto.EmailMetaData) error {
 
 	emailData := EmailData{
-		Body: "This is the main content of the email.",
+		Name: "Customer",
+		Body: emailMetaData.BodyMessage,
 	}
 
 	builder := NewEmailBuilder().
 		From(os.Getenv("SENDER_EMAIL")).
-		To([]string{receiverEmailAddress}).
-		Subject(subject).
-		HTMLBodyFromFile(htmlFilePath, emailData).
-		AttachQRCode("booking-id")
+		To([]string{emailMetaData.ReceiverEmailAddress}).
+		Subject(emailMetaData.EmailSubject).
+		HTMLBodyFromFile(emailMetaData.HTMLFilePath, emailData).
+		AttachPDFWithQRCode(emailMetaData.ContentDetails, emailMetaData.ContentDetails.FileName)
 
 	err := builder.Send()
 	if err != nil {
