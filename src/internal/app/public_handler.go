@@ -2,11 +2,12 @@ package app
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/emails"
 	response "github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/http"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/messages"
-	"net/http"
 )
 
 func (m *MicroserviceServer) SendEmailPublic(w http.ResponseWriter, r *http.Request) {

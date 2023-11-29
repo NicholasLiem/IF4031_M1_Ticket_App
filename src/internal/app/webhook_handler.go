@@ -3,12 +3,13 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/emails"
 	"io"
 	"math"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/NicholasLiem/IF4031_M1_Ticket_App/utils/emails"
 
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/datastruct"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
@@ -55,12 +56,40 @@ func (m *MicroserviceServer) WebhookPaymentHandler(w http.ResponseWriter, r *htt
 	//Check the status
 	status := incomingInvoicePayload.PaymentStatus == datastruct.SUCCESS
 	if !status {
-
 		emailMetaData.EmailSubject = "Ticket App - Payment Failed"
 		emailMetaData.BodyMessage = "Your payment failed, please make a new booking."
 		err = emails.SendEmail(emailMetaData)
 		if err != nil {
 			response.ErrorResponse(w, http.StatusInternalServerError, "Fail to send email")
+		}
+
+		//Update seat status to booked if status success
+		newSeatStatus := datastruct.Seat{
+			Status: datastruct.OPEN,
+		}
+
+		// Retry attempt if update seat status is failed
+		// Simple mechanism
+		attemptCount := 3
+		var updateSeatErr error
+
+		for i := 0; i < attemptCount; i++ {
+			_, updateSeatErr = m.seatService.UpdateSeat(incomingInvoicePayload.SeatID, newSeatStatus)
+			if updateSeatErr == nil {
+				break
+			}
+			fmt.Println("Update seat failed, retrying...")
+			time.Sleep(time.Duration(math.Pow(2, float64(i))) * time.Second)
+		}
+
+		if updateSeatErr != nil {
+			// Send email notification about the failure to update seat status
+			emailMetaData.EmailSubject = "Ticket App - Seat Update Failed"
+			emailMetaData.BodyMessage = "Failed to update seat status, please contact the administrator."
+			err = emails.SendEmail(emailMetaData)
+			if err != nil {
+				fmt.Println("Fail to send email about seat update failure:", err)
+			}
 		}
 
 		// Call webhook in Client App

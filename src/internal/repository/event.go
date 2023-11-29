@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/datastruct"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
-	"time"
 )
 
 type EventQuery interface {
