@@ -1,12 +1,15 @@
 package repository
 
 import (
+	"context"
 	"fmt"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
 	"os"
+	"strconv"
 )
 
 type DAO interface {
@@ -15,7 +18,8 @@ type DAO interface {
 }
 
 type dao struct {
-	pgdb *gorm.DB
+	pgdb  *gorm.DB
+	redis *redis.Client
 }
 
 var DisableLogger = logger.New(
@@ -25,9 +29,10 @@ var DisableLogger = logger.New(
 	},
 )
 
-func NewDAO(db *gorm.DB) DAO {
+func NewDAO(db *gorm.DB, rc *redis.Client) DAO {
 	return &dao{
-		pgdb: db,
+		pgdb:  db,
+		redis: rc,
 	}
 }
 
@@ -67,8 +72,30 @@ func SetupDB() *gorm.DB {
 	return db
 }
 
+func SetupRedis(ctx context.Context) *redis.Client {
+	redisDB, err := strconv.ParseInt(os.Getenv("REDIS_DB"), 10, 64)
+	if err != nil {
+		panic("Failed to parse REDIS_DB: " + err.Error())
+	}
+
+	client := redis.NewClient(&redis.Options{
+		Addr:     os.Getenv("REDIS_ADDRESS"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       int(redisDB),
+	})
+
+	_, err = client.Ping(ctx).Result()
+	if err != nil {
+		panic("Failed to connect to Redis: " + err.Error())
+	}
+
+	log.Println("Successfully connected to Redis")
+
+	return client
+}
+
 func (d *dao) NewEventQuery() EventQuery {
-	return NewEventQuery(d.pgdb)
+	return NewEventQuery(d.pgdb, d.redis)
 }
 
 func (d *dao) NewSeatQuery() SeatQuery {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"net/http"
@@ -21,7 +22,7 @@ func main() {
 	/**
 	Creating context
 	*/
-	//ctx := context.Background()
+	ctx := context.Background()
 
 	/**
 	Loading .env file
@@ -48,11 +49,12 @@ func main() {
 	Setting up DB
 	*/
 	db := repository.SetupDB()
+	redis := repository.SetupRedis(ctx)
 
 	/**
 	Registering DAO's and Services
 	*/
-	dao := repository.NewDAO(db)
+	dao := repository.NewDAO(db, redis)
 
 	eventService := service.NewEventService(dao)
 	seatService := service.NewSeatService(dao)

@@ -1,9 +1,14 @@
 package repository
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/datastruct"
 	"github.com/NicholasLiem/IF4031_M1_Ticket_App/internal/dto"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
+	"time"
 )
 
 type EventQuery interface {
@@ -15,12 +20,14 @@ type EventQuery interface {
 }
 
 type eventQuery struct {
-	pgdb *gorm.DB
+	pgdb  *gorm.DB
+	redis *redis.Client
 }
 
-func NewEventQuery(pgdb *gorm.DB) EventQuery {
+func NewEventQuery(pgdb *gorm.DB, redis *redis.Client) EventQuery {
 	return &eventQuery{
-		pgdb: pgdb,
+		pgdb:  pgdb,
+		redis: redis,
 	}
 }
 
@@ -29,6 +36,14 @@ func (eq *eventQuery) CreateEvent(event datastruct.Event) (*datastruct.Event, er
 	if result.Error != nil {
 		return nil, result.Error
 	}
+
+	ctx := context.Background()
+	cacheKey := fmt.Sprintf("event:%d", event.ID)
+	marshaledEvent, err := json.Marshal(event)
+	if err == nil {
+		_ = eq.redis.Set(ctx, cacheKey, marshaledEvent, time.Hour).Err()
+	}
+
 	return &event, nil
 }
 
@@ -46,6 +61,10 @@ func (eq *eventQuery) UpdateEvent(eventID uint, event dto.UpdateEventDTO) (*data
 		return nil, result.Error
 	}
 
+	ctx := context.Background()
+	cacheKey := fmt.Sprintf("event:%d", eventID)
+	_ = eq.redis.Del(ctx, cacheKey).Err()
+
 	return &existingEvent, nil
 }
 
@@ -61,14 +80,29 @@ func (eq *eventQuery) DeleteEvent(eventID uint) (*datastruct.Event, error) {
 		return nil, result.Error
 	}
 
+	ctx := context.Background()
+	cacheKey := fmt.Sprintf("event:%d", eventID)
+	_ = eq.redis.Del(ctx, cacheKey).Err()
+
 	return &existingEvent, nil
 }
 
 func (eq *eventQuery) GetEvent(eventID uint) (*datastruct.Event, error) {
+	ctx := context.Background()
 	event := datastruct.Event{}
+
+	cacheKey := fmt.Sprintf("event:%d", event.ID)
+	_ = eq.redis.Del(ctx, cacheKey).Err()
+
 	result := eq.pgdb.Where("id = ?", eventID).Preload("Seats").First(&event)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	marshaledEvent, err := json.Marshal(event)
+	if err == nil {
+		// Set the cache with an expiration time (e.g., 1 hour)
+		_ = eq.redis.Set(ctx, cacheKey, marshaledEvent, time.Hour).Err()
 	}
 
 	return &event, nil

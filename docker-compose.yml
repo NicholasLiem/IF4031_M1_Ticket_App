@@ -29,6 +29,16 @@ services:
       - ticket_db
     networks:
       - ticket-network
+  ticket_redis:
+    container_name: ticket-redis
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: dockerfile/Dockerfile.redis-server
+    ports:
+      - "6379:6379"
+    networks:
+      - ticket-network
 
 networks:
   ticket-network:
