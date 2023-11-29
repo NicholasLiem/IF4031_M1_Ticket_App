@@ -1,0 +1,241 @@
+{
+	"info": {
+		"_postman_id": "215d3d8c-31b2-4ae8-adf4-d23db163d0d6",
+		"name": "Ticket App",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30701742",
+		"_collection_link": "https://crimson-meadow-438973.postman.co/workspace/PAT~5e4b20a9-a21e-48b8-8eef-baeb56a29ad7/collection/30701742-215d3d8c-31b2-4ae8-adf4-d23db163d0d6?action=share&source=collection_link&creator=30701742"
+	},
+	"item": [
+		{
+			"name": "Event",
+			"item": [
+				{
+					"name": "Create New Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "sembunyiinapahayoo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"event_name\": \"Test Event2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_ticket_url}}/v1/event",
+							"host": [
+								"{{base_ticket_url}}"
+							],
+							"path": [
+								"v1",
+								"event"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete an event",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_ticket_url}}/event/1",
+							"host": [
+								"{{base_ticket_url}}"
+							],
+							"path": [
+								"event",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update event by id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"event_name\": \"Event 2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_ticket_url}}/event/2",
+							"host": [
+								"{{base_ticket_url}}"
+							],
+							"path": [
+								"event",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Event by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_ticket_url}}/event/2",
+							"host": [
+								"{{base_ticket_url}}"
+							],
+							"path": [
+								"event",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Seat",
+			"item": [
+				{
+					"name": "Create New Seat",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"status\": \"open\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_ticket_url}}/seat/1",
+							"host": [
+								"{{base_ticket_url}}"
+							],
+							"path": [
+								"seat",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Seat from Event Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "sembunyiinapahayoo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_ticket_url}}/event/:event_id/seats",
+							"host": [
+								"{{base_ticket_url}}"
+							],
+							"path": [
+								"event",
+								":event_id",
+								"seats"
+							],
+							"variable": [
+								{
+									"key": "event_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Public",
+			"item": [
+				{
+					"name": "Send Email",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_ticket_url}}/public",
+							"host": [
+								"{{base_ticket_url}}"
+							],
+							"path": [
+								"public"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Webhook",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "sembunyiinapahayoo",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"8935891a-befc-4435-80f1-5d8fca1e7630\",\r\n    \"bookingID\": \"3169525d-26fe-4272-ad6f-2f67e8d3bfa4\",\r\n    \"eventID\": 1,\r\n    \"customerID\": 1,\r\n    \"seatID\": 1,\r\n    \"email\": \"nathania.calista01@gmail.com\",\r\n    \"paymentURL\": \"http://localhost:8082/api/v1/payment/pay?invoice_id=8935891a-befc-4435-80f1-5d8fca1e7630\",\r\n    \"paymentStatus\": \"SUCCESS\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_ticket_url}}/webhook",
+					"host": [
+						"{{base_ticket_url}}"
+					],
+					"path": [
+						"webhook"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
